@@ -1,0 +1,19 @@
+sui client call --package \
+--module <MODULE_NAME> \
+--function <FUNCTION_NAME> \
+--args "<ARGUMENTS>" \
+--gas-budget <GAS_BUDGET>
+
+====
+sui client call --package 0x369a5f1412b8318a9d19f9907cb8f7eb70f78a30bbd88052caafab94371e521d \
+--module firoll \
+--function mint \
+--args 0xf91ff19530f8b905775553e2337a76d39774e27cc0ce100c9faeb87d3c10691c 100000000000 \
+--gas-budget 50000000
+
+====
+sui client call --package 0x369a5f1412b8318a9d19f9907cb8f7eb70f78a30bbd88052caafab94371e521d \
+--module firoll \
+--function mint \
+--args "0xf91ff19530f8b905775553e2337a76d39774e27cc0ce100c9faeb87d3c10691c 100000000000 <THIRD_ARGUMENT>" \
+--gas-budget 50000000

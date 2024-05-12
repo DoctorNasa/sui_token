@@ -1,92 +1,80 @@
-Failed to publish the Move module(s), reason: [warning] Local dependency did not match its on-chain version at 0000000000000000000000000000000000000000000000000000000000000001::MoveStdlib::type_name
 
-This may indicate that the on-chain version(s) of your package's dependencies may behave differently than the source version(s) your package was built against.
+# Deploy Token on SUI Chain using Move 2024
 
-Fix this by rebuilding your packages with source versions matching on-chain versions of dependencies, or ignore this warning by re-running with the --skip-dependency-verification flag.
-❯ sui client publish --gas-budget 100000000 --skip-dependency-verification
-[warn] Client/Server api version mismatch, client api version : 1.24.0, server api version : 1.25.0
-UPDATING GIT DEPENDENCY https://github.com/MystenLabs/sui.git
-INCLUDING DEPENDENCY Sui
-INCLUDING DEPENDENCY MoveStdlib
-BUILDING firoll
-warning[W02021]: duplicate alias
-  ┌─ ./sources/firoll.move:2:14
-  │
-2 │     use std::option; // instead of using aliases for Self and UID
-  │              ^^^^^^ Unnecessary alias 'option' for module 'std::option'. This alias is provided by default
-  │
-  = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+## Overview
+This README provides a guide on how to deploy a token on the Sui blockchain using the updated Move 2024 language features.
 
-warning[W02021]: duplicate alias
-  ┌─ ./sources/firoll.move:4:23
-  │
-4 │     use sui::object::{Self, UID};
-  │                       ^^^^ Unnecessary alias 'object' for module 'sui::object'. This alias is provided by default
-  │
-  = This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+## Requirements
+- Sui client (Make sure it's the latest version to avoid compatibility issues)
+- Move 2024 compiler
 
-========================
-0x2::coin::TreasuryCap<0xa4d3cc5557ca16ecfcdfc71a4d15c6b373004d2b3aa0678e367e7b50ce7d3a3::firoll::FIROLL>
-0x2::coin::firoll::FIROLL
-0x2::firoll::FIROLL
-0x2::sui::SUI
-0x0a4d3cc5557ca16ecfcdfc71a4d15c6b373004d2b3aa0678e367e7b50ce7d3a3
+## Step-by-Step Guide
 
-==================================
- PackageID: 0x7306e00d2f9822dea504abbc51bb49bf439dc21497290114d0180ac71e335886                                            │
-│  │ Version: 1                                                                                                               │
-│  │ Digest: 2J2vGjGBEaWBvD84rBdZE1Rce66Xmwstq2RguhdRb65i                                                                     │
-│  │ Modules: firoll    
+### 1. Create a New Sui Wallet
+Create a new address that will act as your wallet on the Sui network.
+```bash
+sui client new-address ed25519
+```
 
-0x2::coin::TreasuryCap<0x7306e00d2f9822dea504abbc51bb49bf439dc21497290114d0180ac71e335886::firoll::FIROLL>
+### 2. Create a New Move Package
+Initialize a new Move package to start your project.
+```bash
+sui move new my_first_package
+```
 
-========
-Alternative output
-$ sui client publish --gas-budget 100000000 --json
-possible to specify the --json flag during publishing to get the output in JSON format. 
+### 3. Update Your Move.toml
+Ensure your `Move.toml` specifies the 2024 edition:
+```toml
+edition = "2024.beta"
+```
 
-sui client publish --gas-budget 100000000 --skip-dependency-verification  --json
+### 4. Develop Your Token Contract
+Implement your token logic in Move. Below is a basic example of a token module using Move 2024 features:
 
-========
-Building the Transaction in CLI
-$ sui client ptb \
---gas-budget 100000000 \
---assign sender @$MY_ADDRESS \
---move-call $PACKAGE_ID::todo_list::new \
---assign list \
---transfer-objects "[list]" sender
-========
-mint token
+```move
+module firoll::firoll {
+    use std::option;
+    use sui::coin;
+    use sui::transfer;
+    use sui::tx_context::{Self, TxContext};
 
-sui client call --package <PACKAGE_ID> --module supra --function mint --args <TREASURYCAP_ID> 1000000 <RECIPIENT_ADDRESS> --gas-budget 300000000
+    public struct FIROLL has drop {}
 
-sui client call --package 0x68f635cd81f5dfdb578ae8aa1ab159f1a6c00a77319c4ef6230c91b27d3dc8ff  --module firoll --function mint --args 0x68f635cd81f5dfdb578ae8aa1ab159f1a6c00a77319c4ef6230c91b27d3dc8ff 1000000 0xf91ff19530f8b905775553e2337a76d39774e27cc0ce100c9faeb87d3c10691c --gas-budget 30000000000
+    fun init(witness: FIROLL, ctx: &mut TxContext) {
+        let (treasury, metadata) = coin::create_currency(witness, 9, b"PE", b"FIROLL", b"", option::none(), ctx);
+        transfer::public_freeze_object(metadata);
+        transfer::public_transfer(treasury, tx_context::sender(ctx))
+    }
 
---------- = 
----------- = 
-sui client ptb \
---move-call package::module::function "<u64,u8,u256>"
---gas-budget 50000000 --preview
+    public entry fun mint(
+        treasury: &mut coin::TreasuryCap<FIROLL>, amount: u64, recipient: address, ctx: &mut TxContext
+    ) {
+        coin::mint_and_transfer(treasury, amount, recipient, ctx)
+    }
+}
+```
 
-sui client ptb \
---gas-budget 300000000 \
---move-call 0x68f635cd81f5dfdb578ae8aa1ab159f1a6c00a77319c4ef6230c91b27d3dc8ff::firoll::mint \
-0xc8c020b530ca242eeb360cf54813b56ae5b7b595cf1f695961ca844d88a30bbd 1000 0xf91ff19530f8b905775553e2337a76d39774e27cc0ce100c9faeb87d3c10691c 
+### 5. Publish Your Package
+Publish your package to the Sui blockchain.
+```bash
+sui client publish --gas-budget 100000000 --skip-dependency-verification
+```
 
-sui client ptb \
---move-call package::module::function "<u64,u8,u256>"
---gas-budget 50000000 --preview
+### 6. Mint Tokens
+Execute the mint function to issue new tokens to a specified address.
+```bash
+sui client call --package <PACKAGE_ID> --module firoll --function mint --args <TREASURYCAP_ID> 1000000 <RECIPIENT_ADDRESS> --gas-budget 300000000
+```
 
-sui client ptb \
---gas-budget 100000000 \
---move-call 0x7306e00d2f9822dea504abbc51bb49bf439dc21497290114d0180ac71e335886::firoll::mint \
-"0x123456789abcdef0" "1000" "0xfedcba9876543210"   --preview
-This command assumes:
+### 7. Handling Updates and Migrations
+To update your Move code or migrate to a newer version, use:
+```bash
+sui move migrate
+```
 
+## Troubleshooting
+- Ensure your client and server versions match.
+- Check for network protocol compatibility.
 
-"0x123456789abcdef0" is the treasury capability object ID.
-"1000" is the amount to be minted.
-"0xfedcba9876543210" is the recipient's address.
-=====
-sui client object <object_id>
-=====
+For more detailed commands and outputs, refer to the Move documentation and Sui developer resources.
+
