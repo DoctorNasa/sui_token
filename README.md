@@ -1,7 +1,7 @@
 
 # Deploy Token on SUI Chain using Move 2024
 
-## Clound you please give me a Star! :star: :star: :star:
+## Could you please give me a Star! :star: :star: :star: THANK YOU SO MUCH
 
 ## Overview
 This README provides a guide on how to deploy a token on the Sui blockchain using the updated Move 2024 language features.
