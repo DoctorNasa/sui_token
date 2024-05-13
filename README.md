@@ -79,6 +79,8 @@ sui move migrate
 - Check for network protocol compatibility.
 
 For more detailed commands and outputs, refer to the Move documentation and Sui developer resources.
+## Read more
+here: https://medium.com/@roongroj777/deploy-token-on-sui-move-2024-edition-1a51d2d71ebd
 
 ## Please Give Me a Star! :star: :star: :star:
 If you find this repository useful, please consider giving it a star on GitHub. Your support is a big thank you to me and motivates me to continue developing and sharing more great content!
