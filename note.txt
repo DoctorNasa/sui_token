@@ -193,3 +193,11 @@ sui client ptb \
 --move-call 0xb00dd0111d441b900ca6b8f52668e611c53e783da83423cd827abaa8ddb5c026::firoll::burn "111111" FIROLL \
 --gas-budget 50000000
 
+sui client call --package 0x86f99337e5174c305760057734136a1e8cac71c03301c3fba6a144af98529b32 \
+  --module firoll \
+  --function burn \
+  --args 0xd470aab282f15ee36f3e83eeca7291034cea2f5e401ddf824d938a8c63954648 \
+          0x16ea148e1f0e530de36ed9f689cf2bffb1d5745ae4f9fb961b2381f198419b15 \
+          100000000000000000 \
+  --gas-budget 1000000
+
