@@ -7,7 +7,6 @@ module firoll::firoll {
     use sui::balance;
     use sui::borrow;
 
-    
     const MAX_SUPPLY: u64 = 1_000_000_000; // Max supply of the token
     const ICON_URL: vector<u8> = b"https://bafybeiecppfzpgx7xosf7h4a2zistip2d4lawqkwsp2dtp3ucmjpmnb6tq.ipfs.nftstorage.link/";
 
@@ -47,7 +46,7 @@ module firoll::firoll {
         timestamp: u64,
         airdrop: Airdrop
     }
-    
+
     public struct Referent<FIROLL> has store {
         id: address,
         value: option::Option<FIROLL>
@@ -61,7 +60,7 @@ module firoll::firoll {
     }
 
     // Module initializer
-     fun init(witness: FIROLL, ctx: &mut TxContext) {
+    fun init(witness: FIROLL, ctx: &mut TxContext) {
         let ascii_url = std::ascii::string(ICON_URL);
         let icon_url = url::new_unsafe(ascii_url);
 
@@ -93,9 +92,9 @@ module firoll::firoll {
 
     public entry fun mint(
         treasury: &mut TreasuryCap<FIROLL>, amount: u64, recipient: address, timestamp_ms: u64, ctx: &mut TxContext
-    ):borrow::Coin<FIROLL> {
+    ) {
         let token_details_id = object::id(treasury);
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(!token_details.paused, 1); // Contract is paused
         assert!(token_details.total_supply + amount <= token_details.max_supply, 2); // Max supply exceeded
 
@@ -108,8 +107,8 @@ module firoll::firoll {
     public entry fun burn(
         treasury: &mut TreasuryCap<FIROLL>, c: Coin<FIROLL>, amount: u64, ctx: &mut TxContext
     ) {
-        let token_details_id = object::id(&treasury);
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details_id = object::id(treasury);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(!token_details.paused, 1); // Contract is paused
 
         let coin_balance = balance::value(coin::balance(&c));
@@ -123,22 +122,23 @@ module firoll::firoll {
     public entry fun burn_from_admin(
         treasury: &mut TreasuryCap<FIROLL>, amount: u64, account: address, ctx: &mut TxContext
     ) {
-        let token_details_id = object::id(&treasury);
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details_id = object::id(treasury);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(token_details.owner == ctx.sender(), 1); // Only owner can perform admin burn
 
-        let coin_balance = balance::value(coin::balance(account));
+        // Retrieve the coin instance for the account
+        let coin_instance = coin::borrow_mut(account); // Assuming this is how you retrieve the coin instance
+        let coin_balance = balance::value(coin::balance(&coin_instance));
         assert!(coin_balance >= amount, 0); // Insufficient balance
 
-        let coin = coin::borrow_coin(account);
-        coin::burn(treasury, coin);
+        coin::burn(treasury, coin_instance);
         token_details.total_supply = token_details.total_supply - amount;
     }
 
     // Claim airdrop
     public entry fun claim_airdrop(treasury: &mut TreasuryCap<FIROLL>, ctx: &mut TxContext) {
-        let token_details_id = object::id(&treasury);
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details_id = object::id(treasury);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
 
         let sender = ctx.sender();
         let mut i = 0;
@@ -160,7 +160,7 @@ module firoll::firoll {
         new_recipients: vector<address>, new_amounts: vector<u64>, ctx: &mut TxContext
     ) {
         let token_details_id = object::id(ctx.sender());
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(token_details.owner == ctx.sender(), 1); // Only owner can update airdrop
 
         assert!(vector::length(&new_recipients) == vector::length(&new_amounts), 2); // Recipients and amounts length mismatch
@@ -178,21 +178,21 @@ module firoll::firoll {
 
     public entry fun pause(ctx: &mut TxContext) {
         let token_details_id = object::id(ctx.sender());
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(token_details.owner == ctx.sender(), 1); // Only owner can pause
         token_details.paused = true;
     }
 
     public entry fun unpause(ctx: &mut TxContext) {
         let token_details_id = object::id(ctx.sender());
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(token_details.owner == ctx.sender(), 1); // Only owner can unpause
         token_details.paused = false;
     }
 
     public entry fun transfer_ownership(new_owner: address, ctx: &mut TxContext) {
         let token_details_id = object::id(ctx.sender());
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(token_details.owner == ctx.sender(), 1); // Only owner can transfer ownership
         token_details.owner = new_owner;
     }
@@ -214,7 +214,7 @@ module firoll::firoll {
     // Placeholder for Votes (not fully implemented)
     public entry fun vote(candidate: address, ctx: &mut TxContext) {
         let token_details_id = object::id(ctx.sender());
-        let token_details = borrow_global_mut<TokenDetails>(token_details_id);
+        let token_details = borrow::borrow_mut<TokenDetails>(token_details_id);
         assert!(token_details.paused == false, 1); // Contract is paused
         token_details.votes = token_details.votes + 1;
     }
