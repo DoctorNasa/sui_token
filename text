@@ -17,3 +17,18 @@ sui client call --package 0x369a5f1412b8318a9d19f9907cb8f7eb70f78a30bbd88052caaf
 --function mint \
 --args "0xf91ff19530f8b905775553e2337a76d39774e27cc0ce100c9faeb87d3c10691c 100000000000 <THIRD_ARGUMENT>" \
 --gas-budget 50000000
+
+sui client call --package 0x8e1f49728c8c6ebe8daa41b73af7c8de666d24ca6099d492cd830bf4156de63d \
+  --module firoll \
+  --function mint \
+  --args 0xefa63e7df13261e44260d0a8dab1fd80cd1e3ef27503bf58a2ef31329aadac5b \
+          100000000000000000 \
+
+  --gas-budget 1000000
+sui client call --package 0x8e1f49728c8c6ebe8daa41b73af7c8de666d24ca6099d492cd830bf4156de63d \
+  --module firoll \
+  --function burn \
+  --args 0xefa63e7df13261e44260d0a8dab1fd80cd1e3ef27503bf58a2ef31329aadac5b \
+         0xacdfc69cad9f7346505fa5e027329626cb094e68f6e938cef7b63e23f202dcf0 \
+          100000000000000000 \
+  --gas-budget 1000000
